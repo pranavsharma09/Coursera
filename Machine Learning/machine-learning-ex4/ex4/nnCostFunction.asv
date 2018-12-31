@@ -63,8 +63,6 @@ Theta2_grad = zeros(size(Theta2));
 %
 
 X = [ones(size(X, 1), 1) X]; %5000 x 401
-
-size(X)
 z2 = X * Theta1'; %5000 x 25
 a2 = sigmoid(z2);
 a2 = [ones(size(a2, 1), 1) a2];
@@ -80,25 +78,29 @@ for i=1:num_labels
     yMatrix(i,:) = (y==i);
 end
 
-
-
 penalize = (lambda / (2 * m)) * (sum((Theta1(:, 2:end) .^ 2), 'all') + sum((Theta2(:, 2:end) .^2), 'all'));
 
 J = (1 / m) * sum(sum(-yMatrix' .* log(h) - (1 - yMatrix)' .* log(1 - h))) + penalize;
 
-% for t = 1:m
-%     a1 = X(:, t); %5000 x 1    
-%     a1 = [ones(m, 1) X]; %5000 x 2
-%         
-% %     z2 = X * Theta1'; %5000 x 25
-% %     a2 = sigmoid(z2);
-% %     a2 = [ones(size(a2, 1), 1) a2];
-% % 
-% %     z3 = a2 * Theta2'; %5000 x 10
-% %     a3 = sigmoid(z3);
-% %     
-% %     d3 = 
-% end
+accumulation = zeros(3); %
+
+for t = 1:m
+    a1 = X(t, :); %1 x 401  
+    z2 = a1 * Theta1'; %1 x 25
+    a2 = sigmoid(z2);
+    a2 = cat(2, 1, a2); %1 x 26
+ 
+    z3 = a2 * Theta2'; %1 x 10
+    a3 = sigmoid(z3); 
+    
+    d3 = a3 - yMatrix(:, t)'; %1 x 10
+
+    z2 = cat(2, 1, z2); %1 x 26
+    d2 = d3 * Theta2 .* sigmoidGradient(z2); %1 x 26
+    
+    accumulation(1) = accumulation(1) + a1' * d2(2:end); %401 x 25
+    accumulation(2) = accumulation(2) + a2' * d3(2:end 
+end
 
 
 

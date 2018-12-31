@@ -78,12 +78,12 @@ for i=1:num_labels
     yMatrix(i,:) = (y==i);
 end
 
-
-
 penalize = (lambda / (2 * m)) * (sum((Theta1(:, 2:end) .^ 2), 'all') + sum((Theta2(:, 2:end) .^2), 'all'));
 
 J = (1 / m) * sum(sum(-yMatrix' .* log(h) - (1 - yMatrix)' .* log(1 - h))) + penalize;
 
+accumulation1 = zeros(size(Theta1));
+accumulation2 = zeros(size(Theta2));
 for t = 1:m
     a1 = X(t, :); %1 x 401  
     z2 = a1 * Theta1'; %1 x 25
@@ -93,17 +93,22 @@ for t = 1:m
     z3 = a2 * Theta2'; %1 x 10
     a3 = sigmoid(z3); 
     
+    d3 = a3 - yMatrix(:, t)'; %1 x 10
+
+    d2 = d3 * Theta2(:, 2:end) .* sigmoidGradient(z2); %1 x 25
     
+    accumulation1 = accumulation1 + d2' * a1; %25 x 401
+    accumulation2 = accumulation2 + d3' * a2; %10 x 26 
 end
 
+Theta1_grad = (1 / m) * accumulation1;
+Theta2_grad = (1 / m) * accumulation2;
 
+penalty1 = (lambda / m) * Theta1(:, 2:end);
+penalty2 = (lambda / m) * Theta2(:, 2:end);
 
-
-
-
-
-
-
+Theta1_grad(:, 2:end) = Theta1_grad(:, 2:end) + penalty1;
+Theta2_grad(:, 2:end) = Theta2_grad(:, 2:end) + penalty2;
 
 % -------------------------------------------------------------
 
